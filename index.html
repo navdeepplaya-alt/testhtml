@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Data Flow Animation</title>
+    <style>
+        :root {
+            --bg-color: #0a192f; /* Match dark blue background */
+            --accent-blue: #00d2ff; /* Bright blue for lines/glow */
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Main Container to hold image and animations */
+        .diagram-container {
+            position: relative;
+            max-width: 1200px;
+            width: 100%;
+            /* Ensure container holds the aspect ratio of the image */
+            aspect-ratio: 16 / 9; 
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* The static background diagram */
+        .base-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Layer to hold all animated elements positioned absolutely */
+        .animation-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Ensure it doesn't block interaction */
+        }
+
+        /* --- Reusable Animated Data Packet Style --- */
+        .data-packet {
+            position: absolute;
+            width: 1.5%; /* Relative sizing */
+            aspect-ratio: 3/4;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 2px;
+            box-shadow: 0 0 10px var(--accent-blue);
+            opacity: 0;
+            z-index: 10;
+        }
+        /* Add little lines inside the packet to look like a document */
+        .data-packet::after {
+            content: '';
+            position: absolute;
+            top: 20%; left: 10%; width: 80%; height: 10%;
+            background: #ccc;
+            box-shadow: 0 4px 0 #ccc, 0 8px 0 #ccc;
+        }
+
+        /* --- Specific Data Flows --- */
+
+        /* 1. Input Flows (Left side converging towards center) */
+        .packet-email {
+            top: 26%; left: 9%;
+            animation: flowInputEmail 5s infinite linear;
+        }
+
+        .packet-chat {
+            top: 49%; left: 9%;
+            animation: flowInputChat 5s infinite linear 1.5s; /* Delay start */
+        }
+
+        .packet-api {
+            top: 70%; left: 9%;
+            animation: flowInputApi 5s infinite linear 3s; /* Delay start */
+        }
+
+        /* Keyframes define the path based on percentage of container width/height */
+        @keyframes flowInputEmail {
+            0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+            10%  { opacity: 1; transform: translate(0, 0) scale(1); }
+            40%  { transform: translate(18vw, 9vh); } /* At Anonymizer entrance */
+            60%  { transform: translate(35vw, 10vh); opacity: 1;} /* Past Anonymizer */
+            100% { transform: translate(53vw, 22vh) scale(0.2); opacity: 0; } /* Into AI Agent */
+        }
+        @keyframes flowInputChat {
+            0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+            10%  { opacity: 1; transform: translate(0, 0) scale(1); }
+            40%  { transform: translate(18vw, 0vh); } /* At Anonymizer entrance */
+            60%  { transform: translate(35vw, 0vh); opacity: 1;} /* Past Anonymizer */
+            100% { transform: translate(53vw, 2vh) scale(0.2); opacity: 0; } /* Into AI Agent */
+        }
+        @keyframes flowInputApi {
+            0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+            10%  { opacity: 1; transform: translate(0, 0) scale(1); }
+            40%  { transform: translate(18vw, -8vh); } /* At Anonymizer entrance */
+            60%  { transform: translate(35vw, -8vh); opacity: 1;} /* Past Anonymizer */
+            100% { transform: translate(53vw, -18vh) scale(0.2); opacity: 0; } /* Into AI Agent */
+        }
+
+
+        /* 2. Database Interactions (Top Right quick zaps) */
+        .db-zap {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent-blue), 0 0 30px white;
+            opacity: 0;
+            top: 50%; left: 63%; /* Start at AI Agent Center */
+        }
+
+        .zap-kn { animation: zapKnowledgeGraph 3s infinite ease-in-out; }
+        .zap-vec { animation: zapVectorDB 3s infinite ease-in-out 1s; }
+        .zap-ext { animation: zapExternal 3s infinite ease-in-out 2s; }
+
+        @keyframes zapKnowledgeGraph {
+            0%, 100% { opacity: 0; transform: translate(0,0); }
+            20% { opacity: 1; }
+            50% { opacity: 1; transform: translate(25vw, -22vh); } /* To Icon */
+            80% { opacity: 0.5; }
+        }
+        @keyframes zapVectorDB {
+            0%, 100% { opacity: 0; transform: translate(0,0); }
+            20% { opacity: 1; }
+            50% { opacity: 1; transform: translate(28vw, -5vh); } /* To Icon */
+            80% { opacity: 0.5; }
+        }
+        @keyframes zapExternal {
+            0%, 100% { opacity: 0; transform: translate(0,0); }
+            20% { opacity: 1; }
+            50% { opacity: 1; transform: translate(28vw, 12vh); } /* To Icon */
+            80% { opacity: 0.5; }
+        }
+
+
+        /* 3. Output Flow (Center to Right) */
+        .packet-output {
+            top: 53%; left: 65%; /* Start exiting AI Agent */
+            background: #e6f9ff; /* Slightly brighter output packets */
+            animation: flowOutput 4s infinite linear;
+        }
+        .packet-output.delayed {
+             animation-delay: 2s;
+        }
+
+        @keyframes flowOutput {
+            0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+            10%  { opacity: 1; transform: translate(0, 0) scale(1); }
+            40%  { transform: translate(14vw, 22vh); } /* At Deanonymizer */
+            100% { transform: translate(27vw, 22vh); opacity: 0; } /* At Response Data */
+        }
+
+
+        /* 4. AI Brain Pulse Effect */
+        .brain-pulse {
+            position: absolute;
+            top: 39%;
+            left: 58.5%;
+            width: 9%;
+            height: 18%;
+            border-radius: 40%;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.4) 0%, rgba(0,0,0,0) 70%);
+            opacity: 0;
+            animation: brainPulsing 2s infinite ease-out;
+        }
+
+        @keyframes brainPulsing {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="diagram-container">
+        <img src="images/back.png" alt="System Architecture Diagram" class="base-image">
+
+        <div class="animation-overlay">
+            <div class="brain-pulse"></div>
+
+            <div class="data-packet packet-email"></div>
+            <div class="data-packet packet-chat"></div>
+            <div class="data-packet packet-api"></div>
+
+            <div class="db-zap zap-kn"></div>
+            <div class="db-zap zap-vec"></div>
+            <div class="db-zap zap-ext"></div>
+
+            <div class="data-packet packet-output"></div>
+            <div class="data-packet packet-output delayed"></div>
+        </div>
+    </div>
+
+</body>
+</html>
